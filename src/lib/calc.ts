@@ -9,7 +9,7 @@ const RATES = {
 	Low: 0.1265 // Low rate (04:00-07:00, 13:00-16:00, 22:00-00:00)
 } as const;
 
-function getRateForHour(hour: number): number {
+export function getRateForHour(hour: number): number {
 	if (hour >= 16 && hour < 19) return RATES.Peak; // Peak
 	if (hour >= 4 && hour < 7) return RATES.Low; // Early morning low
 	if (hour >= 13 && hour < 16) return RATES.Low; // Afternoon low
