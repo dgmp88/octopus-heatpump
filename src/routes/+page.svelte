@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { DailyResult } from '$lib/types';
 	import type { PageData } from './$types';
 
 	import { onMount } from 'svelte';
@@ -69,23 +68,8 @@
 	}
 
 	onMount(async () => {
-		try {
-			const response = await fetch('/api/usage');
-			const jsonData = await response.json();
-
-			if (!response.ok) {
-				throw new Error(jsonData.details || 'Failed to fetch data');
-			}
-
-			data = jsonData;
-			console.log(data);
-			initCostChart();
-			initConsumptionChart();
-		} catch (e) {
-			error = e.message;
-		} finally {
-			loading = false;
-		}
+		initCostChart();
+		initConsumptionChart();
 	});
 </script>
 
