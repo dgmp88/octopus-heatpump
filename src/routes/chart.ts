@@ -65,7 +65,7 @@ export function createChart(
 					label: 'Cost (£)',
 					data: data.costs,
 					borderRadius: 100,
-					borderWidth: 2,
+					borderWidth: 0,
 					yAxisID: 'y',
 
 					backgroundColor: 'rgba(255, 99, 132, 1.0)'
@@ -74,7 +74,7 @@ export function createChart(
 					label: 'Consumption (Kwh)',
 					data: data.consumption,
 					borderRadius: 100,
-					borderWidth: 2,
+					borderWidth: 0,
 					yAxisID: 'y1',
 					backgroundColor: 'rgba(255, 255, 64)'
 				}

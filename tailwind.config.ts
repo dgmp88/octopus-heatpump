@@ -8,8 +8,8 @@ export default {
 		extend: {}
 	},
 
-	plugins: [daisyui],
-	daisyui: {
-		themes: ['forest']
-	}
+	plugins: [daisyui]
+	// daisyui: {
+	// themes: ['forest']
+	// }
 } satisfies Config;
