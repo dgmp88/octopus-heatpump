@@ -84,49 +84,45 @@
 	});
 </script>
 
-<div class="bg-base-200 min-h-screen p-10">
-	<div class="mx-auto w-3/4 min-w-96 max-w-[40rem] text-center">
-		<div class="w-full">
-			<h1 class="pb-8 text-3xl font-bold">⚡ Electricity Usage ⚡</h1>
-			<div class="flex flex-col items-center gap-2 pb-3">
-				<div class="w-36">
-					<label class="label">
-						<span class="label-text">Day</span>
-						<input type="checkbox" class="toggle" bind:checked={weekly} />
-						<span class="label-text">Week</span>
-					</label>
-				</div>
-				{#if !weekly}
-					<div class="flex items-center justify-between gap-2">
-						<button
-							class="btn btn-primary btn-xs"
-							onclick={previousDay}
-							disabled={currentIndex === 0}>←</button
-						>
-						<span>{formatDate(selectedDate)}</span>
-						<button
-							class="btn btn-primary btn-xs"
-							onclick={nextDay}
-							disabled={currentIndex === availableDates.length - 1}>→</button
-						>
-					</div>
-					<div class="stats shadow">
-						<div class="stat">
-							<div class="stat-title text-sm">Total Cost</div>
-							<div class="stat-value text-xl">£{dailyReadings[currentIndex].cost.toFixed(2)}</div>
-						</div>
-						<div class="stat">
-							<div class="stat-title text-sm">Total Usage</div>
-							<div class="stat-value text-xl">
-								{dailyReadings[currentIndex].consumptionKwh.toFixed(2)} kWh
-							</div>
-						</div>
-					</div>
-				{/if}
+<main class="bg-base-200 min-h-screen px-3 py-10">
+	<div class="mx-auto w-full max-w-[50rem] text-center">
+		<h1 class="pb-8 text-3xl font-bold">⚡ Electricity Usage ⚡</h1>
+		<div class="flex flex-col items-center gap-2 pb-3">
+			<div class="w-36">
+				<label class="label">
+					<span class="label-text">Day</span>
+					<input type="checkbox" class="toggle" bind:checked={weekly} />
+					<span class="label-text">Week</span>
+				</label>
 			</div>
-
-			<div class="relative w-full"><canvas id="cost"></canvas></div>
+			{#if !weekly}
+				<div class="flex items-center justify-between gap-2">
+					<button class="btn btn-primary btn-xs" onclick={previousDay} disabled={currentIndex === 0}
+						>←</button
+					>
+					<span>{formatDate(selectedDate)}</span>
+					<button
+						class="btn btn-primary btn-xs"
+						onclick={nextDay}
+						disabled={currentIndex === availableDates.length - 1}>→</button
+					>
+				</div>
+				<div class="stats shadow">
+					<div class="stat">
+						<div class="stat-title text-sm">Total Cost</div>
+						<div class="stat-value text-xl">£{dailyReadings[currentIndex].cost.toFixed(2)}</div>
+					</div>
+					<div class="stat">
+						<div class="stat-title text-sm">Total Usage</div>
+						<div class="stat-value text-xl">
+							{dailyReadings[currentIndex].consumptionKwh.toFixed(2)} kWh
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
+
+		<div class="relative w-full"><canvas id="cost"></canvas></div>
 		<WeatherChart {selectedDate} {weekly} {availableDates} />
 	</div>
-</div>
+</main>
