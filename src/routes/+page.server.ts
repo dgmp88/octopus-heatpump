@@ -1,6 +1,5 @@
-import { json } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
 import { OCTOPUS_API_KEY, METER_MPAN, METER_SERIAL } from '$env/static/private';
+import type { PageServerLoad } from './$types';
 
 import type { ConsumptionResult, OctopusConsumptionResponse } from '$lib/types';
 
@@ -29,7 +28,7 @@ async function getAllReadings(url: string): Promise<ConsumptionResult[]> {
 	return allReadings;
 }
 
-export const GET: RequestHandler = async () => {
+export const load: PageServerLoad = async () => {
 	const now = new Date();
 	//  Set now to 12am
 	now.setHours(0, 0, 0, 0);
@@ -43,40 +42,25 @@ export const GET: RequestHandler = async () => {
 
 	const url = `${OCTOPUS_BASE_URL}/electricity-meter-points/${METER_MPAN}/meters/${METER_SERIAL}/consumption/?period_from=${periodFrom}&period_to=${periodTo}&group_by=hour`;
 
-	try {
-		const readings = await getAllReadings(url);
+	const readings = await getAllReadings(url);
 
-		// Sort readings chronologically
-		const sortedReadings: ConsumptionResult[] = [...readings].sort(
-			(a, b) => new Date(a.interval_start).getTime() - new Date(b.interval_start).getTime()
-		);
+	// Sort readings chronologically
+	const sortedReadings: ConsumptionResult[] = [...readings].sort(
+		(a, b) => new Date(a.interval_start).getTime() - new Date(b.interval_start).getTime()
+	);
 
-		console.log('Data summary:', {
-			totalReadings: sortedReadings.length,
-			firstReading: sortedReadings[0]?.interval_start,
-			lastReading: sortedReadings[sortedReadings.length - 1]?.interval_start,
-			timespan:
-				sortedReadings.length > 0
-					? {
-							from: new Date(sortedReadings[0].interval_start).toLocaleString(),
-							to: new Date(
-								sortedReadings[sortedReadings.length - 1].interval_start
-							).toLocaleString()
-						}
-					: null
-		});
+	console.log('Data summary:', {
+		totalReadings: sortedReadings.length,
+		firstReading: sortedReadings[0]?.interval_start,
+		lastReading: sortedReadings[sortedReadings.length - 1]?.interval_start,
+		timespan:
+			sortedReadings.length > 0
+				? {
+						from: new Date(sortedReadings[0].interval_start).toLocaleString(),
+						to: new Date(sortedReadings[sortedReadings.length - 1].interval_start).toLocaleString()
+					}
+				: null
+	});
 
-		return json(sortedReadings);
-	} catch (error) {
-		console.error('Detailed error:', error);
-		return new Response(
-			JSON.stringify({
-				error: 'Failed to fetch data',
-				details: error.message
-			}),
-			{
-				status: 500
-			}
-		);
-	}
+	return { sortedReadings };
 };
