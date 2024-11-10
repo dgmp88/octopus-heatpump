@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { calculateDailyCost, getRateForHour } from '$lib/calc';
-	import { createChart } from './chart';
+	import { createUsageChart } from '$lib/charts';
 	import type Chart from 'chart.js/auto';
 	import type { ConsumptionResult } from '$lib/types';
 	import WeatherChart from '../components/WeatherChart.svelte';
@@ -72,7 +72,7 @@
 					consumption: getReadingsForDate(selectedDate).map((row) => row.consumption)
 				};
 
-		chart = createChart('cost', data, !weekly);
+		chart = createUsageChart('cost', data, !weekly);
 	}
 
 	$effect(() => {

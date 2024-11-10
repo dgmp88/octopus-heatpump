@@ -37,7 +37,7 @@ function generateTariffAnnotations() {
 }
 
 // Could go in a separate utils file
-export function createChart(
+export function createUsageChart(
 	elementId: string,
 	data: {
 		xLabels: string[] | number[];
@@ -108,6 +108,62 @@ export function createChart(
 			plugins: {
 				annotation: {
 					annotations
+				}
+			}
+		}
+	});
+}
+
+export function createWeatherChart(
+	elementId: string,
+	data: {
+		labels: string[];
+		temperature: number[];
+		apparent_temperature: number[];
+	}
+) {
+	const ctx = document.getElementById(elementId) as HTMLCanvasElement;
+
+	return new Chart(ctx, {
+		type: 'line',
+		data: {
+			labels: data.labels,
+			datasets: [
+				{
+					label: 'Temperature (°C)',
+					data: data.temperature,
+					borderColor: 'rgba(255, 99, 132, 0.3)',
+					yAxisID: 'y'
+				},
+				{
+					label: 'Perceived Temperature (°C)',
+					data: data.apparent_temperature,
+					borderColor: 'rgb(54, 162, 235)',
+					yAxisID: 'y1'
+				}
+			]
+		},
+		options: {
+			responsive: true,
+			scales: {
+				y: {
+					type: 'linear',
+					display: true,
+					position: 'left',
+					title: {
+						display: true,
+						text: 'Temperature (°C)'
+					}
+				},
+				y1: {
+					type: 'linear',
+					display: true,
+					position: 'right',
+					title: {
+						display: true,
+						text: 'Perceived Temperature (°C)'
+					},
+					min: 0
 				}
 			}
 		}

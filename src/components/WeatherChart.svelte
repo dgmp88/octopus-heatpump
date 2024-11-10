@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
+	import { createWeatherChart } from '$lib/charts';
 
 	let { selectedDate, weekly, availableDates } = $props<{
 		selectedDate: string;
@@ -14,6 +15,8 @@
 		hourly: {
 			time: string[];
 			temperature_2m: number[];
+			apparent_temperature: number[];
+			relative_humidity_2m: number[];
 			precipitation: number[];
 		};
 	}
@@ -26,67 +29,11 @@
 		const url =
 			`https://api.open-meteo.com/v1/forecast?` +
 			`latitude=${LAT}&longitude=${LONG}` +
-			`&hourly=temperature_2m,precipitation` +
+			`&hourly=temperature_2m,precipitation,apparent_temperature,relative_humidity_2m` +
 			`&start_date=${startDate}&end_date=${endDate}`;
 
 		const response = await fetch(url);
 		return (await response.json()) as WeatherData;
-	}
-
-	function createWeatherChart(data: {
-		labels: string[];
-		temperature: number[];
-		precipitation: number[];
-	}) {
-		if (chart) {
-			chart.destroy();
-		}
-
-		const ctx = document.getElementById('weather') as HTMLCanvasElement;
-		chart = new Chart(ctx, {
-			type: 'line',
-			data: {
-				labels: data.labels,
-				datasets: [
-					{
-						label: 'Temperature (°C)',
-						data: data.temperature,
-						borderColor: 'rgb(255, 99, 132)',
-						yAxisID: 'y'
-					},
-					{
-						label: 'Precipitation (mm)',
-						data: data.precipitation,
-						borderColor: 'rgb(54, 162, 235)',
-						yAxisID: 'y1'
-					}
-				]
-			},
-			options: {
-				responsive: true,
-				scales: {
-					y: {
-						type: 'linear',
-						display: true,
-						position: 'left',
-						title: {
-							display: true,
-							text: 'Temperature (°C)'
-						}
-					},
-					y1: {
-						type: 'linear',
-						display: true,
-						position: 'right',
-						title: {
-							display: true,
-							text: 'Precipitation (mm)'
-						},
-						min: 0
-					}
-				}
-			}
-		});
 	}
 
 	async function updateChart() {
@@ -109,10 +56,16 @@
 					: new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 			),
 			temperature: weatherData.hourly.temperature_2m,
-			precipitation: weatherData.hourly.precipitation
+			precipitation: weatherData.hourly.precipitation,
+			apparent_temperature: weatherData.hourly.apparent_temperature,
+			relative_humidity: weatherData.hourly.relative_humidity_2m
 		};
 
-		createWeatherChart(data);
+		if (chart) {
+			chart.destroy();
+		}
+
+		chart = createWeatherChart('weather', data);
 	}
 
 	$effect(() => {
