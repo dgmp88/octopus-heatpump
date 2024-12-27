@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { fetchWeatherRange } from '$lib/weather';
+	import { fetchWeatherRange, type WeatherData } from '$lib/weather';
 	import Chart from 'chart.js/auto';
-	import { onMount } from 'svelte';
 
 	let { selectedDate, weekly, availableDates } = $props<{
 		selectedDate: string;
@@ -13,29 +12,17 @@
 
 	const elementId = 'weather';
 
-	function createWeatherChart(weatherData: WeatherData) {
+	function createWeatherChart(data: WeatherData) {
 		if (chart) {
 			chart.destroy();
 		}
 
 		const ctx = document.getElementById(elementId) as HTMLCanvasElement;
 
-		const data = {
-			labels: weatherData.hourly.time.map((time) =>
-				weekly
-					? new Date(time).toLocaleDateString()
-					: new Date(time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-			),
-			temperature: weatherData.hourly.temperature_2m,
-			precipitation: weatherData.hourly.precipitation,
-			apparent_temperature: weatherData.hourly.apparent_temperature,
-			relative_humidity: weatherData.hourly.relative_humidity_2m
-		};
-
 		chart = new Chart(ctx, {
 			type: 'line',
 			data: {
-				labels: data.labels,
+				labels: data.timestamp,
 				datasets: [
 					{
 						label: 'Temperature (°C)',
@@ -44,8 +31,8 @@
 						yAxisID: 'y'
 					},
 					{
-						label: 'Perceived Temperature (°C)',
-						data: data.apparent_temperature,
+						label: 'Relative Humidity (%)',
+						data: data.humidity,
 						borderColor: 'rgb(54, 162, 235)',
 						yAxisID: 'y1'
 					}
@@ -90,7 +77,7 @@
 			endDate = selectedDate;
 		}
 
-		fetchWeatherRange(startDate, endDate).then((weatherData) => {
+		fetchWeatherRange(startDate, endDate, weekly).then((weatherData) => {
 			createWeatherChart(weatherData);
 		});
 	});
