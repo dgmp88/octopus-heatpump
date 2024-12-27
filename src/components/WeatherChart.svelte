@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { fetchWeatherRange } from '$lib/weather';
 	import Chart from 'chart.js/auto';
-	import { createWeatherChart } from '$lib/charts';
+	import { onMount } from 'svelte';
 
 	let { selectedDate, weekly, availableDates } = $props<{
 		selectedDate: string;
@@ -11,43 +11,14 @@
 
 	let chart: Chart;
 
-	interface WeatherData {
-		hourly: {
-			time: string[];
-			temperature_2m: number[];
-			apparent_temperature: number[];
-			relative_humidity_2m: number[];
-			precipitation: number[];
-		};
-	}
+	const elementId = 'weather';
 
-	async function fetchWeatherRange(startDate: string, endDate: string) {
-		// We'll need to get these from config/env
-		const LAT = 51.5074;
-		const LONG = -0.1278;
-
-		const url =
-			`https://api.open-meteo.com/v1/forecast?` +
-			`latitude=${LAT}&longitude=${LONG}` +
-			`&hourly=temperature_2m,precipitation,apparent_temperature,relative_humidity_2m` +
-			`&start_date=${startDate}&end_date=${endDate}`;
-
-		const response = await fetch(url);
-		return (await response.json()) as WeatherData;
-	}
-
-	async function updateChart() {
-		let weatherData: WeatherData;
-
-		if (weekly) {
-			// Get data for the whole range
-			const startDate = availableDates[0];
-			const endDate = availableDates[availableDates.length - 1];
-			weatherData = await fetchWeatherRange(startDate, endDate);
-		} else {
-			// Get data just for selected date
-			weatherData = await fetchWeatherRange(selectedDate, selectedDate);
+	function createWeatherChart(weatherData: WeatherData) {
+		if (chart) {
+			chart.destroy();
 		}
+
+		const ctx = document.getElementById(elementId) as HTMLCanvasElement;
 
 		const data = {
 			labels: weatherData.hourly.time.map((time) =>
@@ -61,23 +32,71 @@
 			relative_humidity: weatherData.hourly.relative_humidity_2m
 		};
 
-		if (chart) {
-			chart.destroy();
-		}
-
-		chart = createWeatherChart('weather', data);
+		chart = new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: data.labels,
+				datasets: [
+					{
+						label: 'Temperature (°C)',
+						data: data.temperature,
+						borderColor: 'rgba(255, 99, 132, 0.3)',
+						yAxisID: 'y'
+					},
+					{
+						label: 'Perceived Temperature (°C)',
+						data: data.apparent_temperature,
+						borderColor: 'rgb(54, 162, 235)',
+						yAxisID: 'y1'
+					}
+				]
+			},
+			options: {
+				responsive: true,
+				scales: {
+					y: {
+						type: 'linear',
+						display: true,
+						position: 'left',
+						title: {
+							display: true,
+							text: 'Temperature (°C)'
+						}
+					},
+					y1: {
+						type: 'linear',
+						display: true,
+						position: 'right',
+						title: {
+							display: true,
+							text: 'Perceived Temperature (°C)'
+						},
+						min: 0
+					}
+				}
+			}
+		});
 	}
 
 	$effect(() => {
-		updateChart();
-	});
+		let startDate, endDate;
+		if (weekly) {
+			// Get data for the whole range
+			startDate = availableDates[0];
+			endDate = availableDates[availableDates.length - 1];
+		} else {
+			// Get data for the selected date
+			startDate = selectedDate;
+			endDate = selectedDate;
+		}
 
-	onMount(() => {
-		updateChart();
+		fetchWeatherRange(startDate, endDate).then((weatherData) => {
+			createWeatherChart(weatherData);
+		});
 	});
 </script>
 
 <h1>Weather</h1>
 <div style="width: 100%">
-	<canvas id="weather"></canvas>
+	<canvas id={elementId}></canvas>
 </div>

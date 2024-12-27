@@ -11,13 +11,13 @@
 	let weekly: boolean = $state(false);
 	let chart: Chart;
 
-	const { sortedReadings } = data;
-	const dailyReadings = calculateDailyCost(sortedReadings);
+	const { readings } = data;
+	const dailyReadings = calculateDailyCost(readings);
 
 	// Get all available dates
 	const availableDates = [
 		...new Set(
-			sortedReadings.map((reading) => new Date(reading.interval_start).toISOString().split('T')[0])
+			readings.map((reading) => new Date(reading.interval_start).toISOString().split('T')[0])
 		)
 	].sort();
 
@@ -26,7 +26,7 @@
 	let currentIndex = $derived(availableDates.indexOf(selectedDate));
 
 	function getReadingsForDate(date: string) {
-		return sortedReadings.filter((reading) => reading.interval_start.startsWith(date));
+		return readings.filter((reading) => reading.interval_start.startsWith(date));
 	}
 
 	function formatDate(date: string) {
@@ -84,7 +84,7 @@
 	});
 </script>
 
-<main class="bg-base-200 min-h-screen px-3 py-10">
+<main class="min-h-screen bg-base-200 px-3 py-10">
 	<div class="mx-auto w-full max-w-[50rem] text-center">
 		<h1 class="pb-8 text-3xl font-bold">⚡ Electricity Usage ⚡</h1>
 		<div class="flex flex-col items-center gap-2 pb-3">
